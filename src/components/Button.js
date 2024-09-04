@@ -56,16 +56,23 @@ function Button({
     danger,
     rounded,
     outlined,
+    small,
     ...rest
 }) {
-        const classes = className(rest.className, 'flex items-center px-3 py-1.5 border',{
-            //'border-blue-500 bg-blue-500 text-white': primary,
+        const classes = className(
+            rest.className,
+            'flex items-center border',
+            {
+            'px-3 py-1.5 text-base': !small,
+            'px-2 py-1 text-xs ': small,
+            'border-blue- bg-blue-500 text-white': primary,
             'border-gray-500 bg-gray-500 text-white': secondary,
             'border-green-500 bg-green-500 text-white': success,
             'border-yellow-500 bg-yellow-500 text-white': warning,
             'border-red-500 bg-red-500 text-black': danger,
             'border-blue-400 bg-blue-300 text-white' : primary,
-            'rounded-full': rounded,
+            'rounded-full': rounded && !small,
+            'rounded-md' : rounded && small,
             'bg-white': outlined,
             'text-blue-500': outlined && primary,
             'text-gray-900': outlined && secondary,

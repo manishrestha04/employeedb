@@ -1,41 +1,116 @@
-import { useState } from "react";
-import Dropdown from "./components/Dropdown";
+import React, { useEffect, useState } from 'react';
+import Sidebar from './components/Sidebar';
+import Route from './components/Route';
+import AcoordionPage from './pages/AcoordionPage';
+import DropdownPage from './pages/DropdownPage';
+import Buttonpage from './pages/ButtonPage';
+import ModalPage from './pages/ModalPage';
+import TablePage from './pages/TablePage';
+import CounterPage from './pages/CounterPage';
+import RegisterPage from './pages/RegisterPage';
+import LoginPage from './pages/LoginPage';
+import FaEntryPage from './pages/FaEntryPage';
+import FaTablePage from './pages/FaTablePage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 
-function App () {
-    const [selection, setSelection] = useState(null);
 
-    const handleSelect = (option) => {
-        setSelection(option);
-    }
+import { AuthContext } from './context/Authcontext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-    const options = [
-        {label: 'Red', value: 'red'},
-        {label: 'Green', value:'green' },
-        {label: 'Yellow', value:'yellow'},
-        {label: 'Blue', value:'blue'},
-    ];
+function App() {
+  const [authState, setAuthState] = useState({
+    username: "",
+    id: 0,
+    status: false,
+  });
 
-    return( 
-    <div className="flex">
-    <Dropdown options={options} value={selection} onChange={handleSelect} />
-    <Dropdown options={options} value={selection} onChange={handleSelect} />
-    </div> )
-};
-export default App; /*
+  let navigate = useNavigate();
 
-import Dropdown from "./components/Dropdown";
+  useEffect(() => {
+    axios.get('http://localhost:3001/auth/auth', {
+      headers: {
+        accessToken: localStorage.getItem("accessToken"),
+      },
+    })
+    .then((response) => {
+      if (response.data.error) {
+        setAuthState({ ...authState, status: false });
+      } else {
+        setAuthState({
+          username: response.data.username,
+          id: response.data.id,
+          status: true,
+        });
+      }
+    });
+  }, []);
 
-function App () {
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    setAuthState({ username: "", id: 0, status: false });
+    navigate("login");
 
-    const options = [
+    window.location.reload();
+  };
 
-        { label: 'Red', value:'red'},
-        { label: 'Blue', value:'blue'},
-        { label: 'Yellow', value:'yellow'}
-    ]
-
-    return (
-    <Dropdown options={options}/>)
+  return (
+    <AuthContext.Provider value={{ authState, setAuthState }}>
+      <div className="container mx-auto grid grid-cols-8 gap-4 w-full">
+        <Sidebar />
+        <div className="col-span-5  w-full">
+          {/* Logout button and welcome message fixed to top right */}
+          {authState.status && (
+            <div className="absolute top-0 right-0 flex items-center space-x-4 p-4">
+              <h1 className="text-gray-800">Welcome {authState.username}!</h1>
+              <button onClick={logout} className="bg-blue-500 text-white p-2 rounded">
+                Logout
+              </button>
+            </div>
+          )}
+          
+          {/* Routes */}
+          <Route path="/accordion">
+            <AcoordionPage />
+          </Route>
+          <Route path="/dropdown">
+            <DropdownPage /> 
+          </Route>
+          <Route path="/buttons">
+            <Buttonpage />
+          </Route>
+          <Route path="/modal">
+            <ModalPage />
+          </Route>
+          <Route path="/table">
+            <TablePage />
+          </Route>
+          <Route path="/counter">
+            <CounterPage initialCount={100} />
+          </Route>
+          <Route path="/faentry">
+            <FaEntryPage />
+          </Route>
+          <Route path="/fatable">
+            <FaTablePage />
+          </Route>
+          <Route path="/changepassword">
+            <ChangePasswordPage />
+          </Route>
+          {!authState.status && (
+            <>
+              <Route path="/">
+                <RegisterPage />
+              </Route>
+              <Route path="/login">
+                <LoginPage />
+              </Route>
+            </>
+          )}
+        </div>
+      </div>
+    </AuthContext.Provider>
+  );
 }
 
-export default App; */
+export default App;
